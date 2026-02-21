@@ -1,0 +1,17 @@
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".claude",
+    ".ruff_cache",
+    ".venv",
+    ".vscode",
+]
+
+[lint]
+select = [
+    "B",  # flake8-bugbear checks
+    "D",  # pydocstyle docstring checks
+    "E",  # pycodestyle errors
+    "F",  # pyflakes errors
+    "I",  # isort import sorting checks
+    "W",  # pycodestyle warnings
+]
