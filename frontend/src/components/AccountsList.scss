@@ -1,0 +1,48 @@
+/** Styles for the accounts section: collapsible summary, institution cards, and account rows. */
+@use "../styles/variables" as *;
+
+.accounts {
+  margin-bottom: 3 * $unit;
+}
+
+.accounts__empty {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.accounts__cards {
+  margin-top: 2 * $unit;
+}
+
+.institution-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: $border-radius;
+  box-shadow: var(--shadow);
+  margin-bottom: 2 * $unit;
+  padding: 2 * $unit;
+}
+
+.institution-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 $unit;
+  color: var(--color-text);
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  padding: $unit 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+
+  &__name {
+    color: var(--color-text);
+  }
+
+  &__meta {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+  }
+}

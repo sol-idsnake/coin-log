@@ -1,0 +1,73 @@
+/** Root layout styles for coin-log: page background, content container, action bar. */
+@use "./styles/variables" as *;
+
+/*
+ * Color tokens: --color-surface and --color-border are derived from Mantine's CSS variables
+ * so that Mantine components (Button, Table, Modal, Badge) and our custom elements share the
+ * same surface and border values and auto-switch with the color scheme. All other colors are
+ * custom and override in [data-mantine-color-scheme="dark"], which is the attribute Mantine
+ * sets on <html> — replacing the old @media / [data-theme] approach.
+ */
+:root {
+  /* Mantine-derived — auto-switch, no dark override needed */
+  --color-surface: var(--mantine-color-default);
+  --color-border: var(--mantine-color-default-border);
+
+  /* Custom — light-mode values */
+  --color-primary: #2e77bc;
+  --color-header-bg: #2e77bc;
+  --color-header-text: #ffffff;
+  --color-text: #111111;
+  --color-text-muted: #555555;
+  --color-bg: #f4f6f8;
+  --color-pending: #f5a623;
+  --color-pending-bg: #fde8c2;
+  --color-pending-text: #a35f00;
+  --color-success: #2a9d5c;
+  --color-danger: #e03e3e;
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-mantine-color-scheme="dark"] {
+  --color-primary: #6aabf0;
+  --color-header-bg: #0d1625;
+  --color-text: #eef2f7;
+  --color-text-muted: #8fa3bf;
+  --color-bg: #0f1117;
+  --color-pending-bg: #2d2008;
+  --color-pending-text: #fbd9a5;
+  --color-success: #4caf7d;
+  --color-danger: #f26b6b;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: system-ui, sans-serif;
+  margin: 0;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  // Subtract header height
+  height: calc(100vh - 56px);
+  overflow: hidden;
+  transition: grid-template-columns 0.25s ease;
+
+  &--sidebar-open {
+    grid-template-columns: 320px 1fr;
+  }
+}
+
+.main-content {
+  overflow-y: auto;
+  padding: 2 * $unit 3 * $unit;
+}

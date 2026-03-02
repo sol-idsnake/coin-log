@@ -1,0 +1,48 @@
+/** Styles for the transaction detail modal content. */
+@use "../styles/variables" as *;
+
+.transaction-detail {
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0 2 * $unit 2 * $unit;
+  }
+
+  &__row {
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    padding: $unit 0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+
+  &__value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0;
+
+    &--in {
+      color: var(--color-success);
+    }
+
+    &--out {
+      color: var(--color-danger);
+    }
+  }
+
+  &__footer {
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: flex-end;
+    padding: 2 * $unit;
+  }
+}

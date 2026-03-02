@@ -1,0 +1,78 @@
+/** Styles for the budget page: header, category grid, and uncategorized panel. */
+@use "../styles/variables" as *;
+
+.budget-page {
+  &__header {
+    align-items: center;
+    display: flex;
+    gap: 2 * $unit;
+    margin-bottom: 2 * $unit;
+  }
+
+  &__month-nav {
+    align-items: center;
+    display: flex;
+    gap: $unit;
+  }
+
+  &__title {
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__summary {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  &__sync-badge {
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+  }
+
+  &__balance {
+    align-items: baseline;
+    display: flex;
+    gap: $unit;
+    margin: 0 0 5 * $unit;
+  }
+
+  &__balance-amount {
+    color: var(--color-text);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  &__balance-label {
+    color: var(--color-text-muted);
+  }
+
+  &__loading {
+    color: var(--color-text-muted);
+    padding: 2 * $unit 0;
+  }
+
+  &__grid {
+    display: grid;
+    gap: 3 * $unit;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  &__divider {
+    border-top: 1px solid var(--color-border);
+    margin: 5 * $unit 0;
+  }
+
+  &__empty {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 4rem auto;
+    max-width: 480px;
+    text-align: center;
+  }
+}

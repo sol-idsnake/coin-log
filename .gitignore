@@ -1,7 +1,17 @@
-__pycache__/
 .claude
 .env
+.serena
+.vscode
+CLAUDE.md
+
+# Backend
+__pycache__/
 .ruff_cache
 .venv/
-.vscode/
-CLAUDE.md
+*.db
+
+# Frontend
+.yarn/
+*.lock
+dist/
+node_modules/

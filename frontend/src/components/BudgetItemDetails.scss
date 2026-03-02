@@ -1,0 +1,58 @@
+/** Styles for the assignments modal content (Mantine Modal owns the shell). */
+@use "../styles/variables" as *;
+
+.modal {
+  &__empty {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    padding: 2 * $unit;
+    text-align: center;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__row {
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    gap: $unit;
+    padding: $unit 2 * $unit;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__amount {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    min-width: 72px;
+    text-align: right;
+
+    &--in {
+      color: var(--color-success);
+    }
+
+    &--out {
+      color: var(--color-danger);
+    }
+  }
+
+  &__name {
+    flex: 1;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__date {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+}

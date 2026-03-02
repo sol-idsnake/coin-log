@@ -1,0 +1,37 @@
+/** Styles for the app header banner and theme toggle button. */
+@use "../styles/variables" as *;
+
+.header {
+  background: var(--color-header-bg);
+  padding: 0 3 * $unit;
+
+  &__inner {
+    max-width: 960px;
+    margin: 0 auto;
+    height: 7 * $unit;
+    display: flex;
+    align-items: center;
+  }
+
+  &__title {
+    color: var(--color-header-text);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  &__theme-toggle {
+    margin-left: auto;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: $border-radius;
+    color: var(--color-header-text);
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0.3rem 0.6rem;
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+}

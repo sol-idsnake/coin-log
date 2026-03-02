@@ -1,0 +1,115 @@
+/** Styles for a single budget category card with item rows and progress bars. */
+@use "../styles/variables" as *;
+
+.budget-category-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: $border-radius;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &__header {
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5 * $unit 2.5 * $unit;
+  }
+
+  &__items {
+    flex: 1;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__add-btn {
+    margin: 1.5 * $unit 2.5 * $unit;
+  }
+}
+
+.budget-item {
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__row {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5 * $unit 2.5 * $unit;
+
+    &--drag-over {
+      background: var(--color-border);
+      outline: 2px dashed var(--color-primary);
+      outline-offset: -2px;
+    }
+  }
+
+  &__name {
+    font-size: 1rem;
+    color: var(--color-text);
+
+    &--link {
+      background: none;
+      border: none;
+      color: var(--color-text);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+      padding: 0;
+      text-align: left;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      transition: text-decoration-color 0.15s;
+
+      &:hover {
+        text-decoration-color: var(--color-primary);
+      }
+    }
+  }
+
+  &__amount {
+    background: none;
+    border: none;
+    border-radius: $border-radius;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.875rem;
+    padding: 2px 6px;
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--color-border);
+      color: var(--color-text);
+    }
+  }
+
+  &__actions {
+    align-items: center;
+    display: flex;
+    gap: 0.5 * $unit;
+    padding: 0 2.5 * $unit 1.5 * $unit;
+  }
+
+  &__bar {
+    background: var(--color-border);
+    height: 4px;
+    margin: 0 2.5 * $unit 0;
+  }
+
+  &__fill {
+    background: var(--color-success);
+    height: 100%;
+    transition: width 0.3s ease;
+
+    &--over {
+      background: var(--color-danger);
+    }
+  }
+}

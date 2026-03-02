@@ -1,0 +1,31 @@
+/** Styles for the collapsible navigation sidebar. */
+@use "../styles/variables" as *;
+
+.sidebar {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  min-width: 0;
+  overflow: hidden;
+
+  &__header {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    padding: $unit;
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    opacity: 1;
+    padding: 0 $unit $unit;
+    pointer-events: auto;
+    transition: opacity 0.15s;
+  }
+
+  &--collapsed &__nav {
+    opacity: 0;
+    pointer-events: none;
+  }
+}

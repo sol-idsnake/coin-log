@@ -1,0 +1,36 @@
+/** Styles for the accounts page: header, action bar, and sync summary. */
+@use "../styles/variables" as *;
+
+.accounts-page {
+  &__title {
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 2 * $unit;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $unit;
+    margin-bottom: 2 * $unit;
+  }
+
+  &__sync-summary {
+    margin-top: 2 * $unit;
+  }
+
+  &__sync-title {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    margin: 0 0 $unit;
+    text-transform: uppercase;
+  }
+
+  &__sync-row {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin: 0 0 4px;
+  }
+}
