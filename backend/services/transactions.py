@@ -3,7 +3,7 @@
 from datetime import date, datetime
 
 from config import plaid_client
-from db import Account, BudgetItem, Institution, Transaction
+from db import Account, BudgetItem, Institution, Session, Transaction
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from utils import get_by_model_id
 
@@ -18,10 +18,10 @@ def _category_string(category_list: list[str] | None) -> str | None:
     return None
 
 
-def _upsert_transaction(session, account_id: int, transaction) -> None:
+def _upsert_transaction(account_id: int, transaction) -> None:
     """Insert or update a single Plaid transaction in the database."""
     existing = (
-        session.query(Transaction)
+        Session.query(Transaction)
         .filter_by(plaid_transaction_id=transaction.transaction_id)
         .first()
     )
@@ -33,7 +33,7 @@ def _upsert_transaction(session, account_id: int, transaction) -> None:
         existing.name = transaction.name
         existing.pending = transaction.pending
     else:
-        session.add(
+        Session.add(
             Transaction(
                 account_id=account_id,
                 amount=transaction.amount,
@@ -48,7 +48,7 @@ def _upsert_transaction(session, account_id: int, transaction) -> None:
         )
 
 
-def _sync_one(session, institution: Institution) -> dict:
+def _sync_one(institution: Institution) -> dict:
     """Sync transactions for a single institution from Plaid.
 
     Updates the institution's cursor and last_synced_at in-place.
@@ -77,7 +77,7 @@ def _sync_one(session, institution: Institution) -> dict:
             db_account_id = account_map.get(transaction.account_id)
             if db_account_id is None:
                 continue
-            _upsert_transaction(session, db_account_id, transaction)
+            _upsert_transaction(db_account_id, transaction)
         added_count += len(response.added)
         modified_count += len(response.modified)
 
@@ -85,12 +85,12 @@ def _sync_one(session, institution: Institution) -> dict:
             if removed.transaction_id is None:
                 continue
             transaction = (
-                session.query(Transaction)
+                Session.query(Transaction)
                 .filter_by(plaid_transaction_id=removed.transaction_id)
                 .first()
             )
             if transaction:
-                session.delete(transaction)
+                Session.delete(transaction)
         removed_count += len(response.removed)
 
         cursor = response.next_cursor
@@ -107,29 +107,32 @@ def _sync_one(session, institution: Institution) -> dict:
     }
 
 
-def sync_all(session) -> dict:
+def sync_all() -> dict:
     """Sync transactions for all institutions.
 
     Raises ValueError if no institutions are linked.
     Returns a summary dict keyed by institution id.
     """
-    institutions = session.query(Institution).all()
+    institutions = Session.query(Institution).all()
     if not institutions:
         raise ValueError("No linked accounts found. Connect a bank first.")
-    return {inst.id: _sync_one(session, inst) for inst in institutions}
+    result = {inst.id: _sync_one(inst) for inst in institutions}
+
+    return result
 
 
-def sync_institution(session, institution_id: int) -> dict:
+def sync_institution(institution_id: int) -> dict:
     """Sync transactions for a single institution by id.
 
     Raises LookupError if not found.
     """
-    institution = get_by_model_id(session, Institution, institution_id)
-    return _sync_one(session, institution)
+    institution = get_by_model_id(Institution, institution_id)
+    result = _sync_one(institution)
+
+    return result
 
 
 def get_all(
-    session,
     account_id: int | None = None,
     deleted: bool = False,
     month: str | None = None,
@@ -143,7 +146,7 @@ def get_all(
     - uncategorized: expense transactions with no budget assignment only
 
     """
-    query = session.query(Transaction)
+    query = Session.query(Transaction)
 
     if month:
         query = query.filter(Transaction.date.like(f"{month}-%"))
@@ -162,7 +165,6 @@ def get_all(
 
 
 def create_manual(
-    session,
     account_id: int,
     amount: float,
     date: str,
@@ -174,7 +176,7 @@ def create_manual(
 
     Raises LookupError if account_id does not exist.
     """
-    get_by_model_id(session, Account, account_id)
+    get_by_model_id(Account, account_id)
     transaction = Transaction(
         account_id=account_id,
         amount=amount,
@@ -185,13 +187,12 @@ def create_manual(
         note=note,
         plaid_transaction_id=None,
     )
-    session.add(transaction)
-    session.commit()
+    Session.add(transaction)
+
     return transaction
 
 
 def update(
-    session,
     transaction_id: int,
     amount: float | None = None,
     check_number: str | None = None,
@@ -204,7 +205,7 @@ def update(
 
     Raises LookupError if not found.
     """
-    transaction = get_by_model_id(session, Transaction, transaction_id)
+    transaction = get_by_model_id(Transaction, transaction_id)
     if amount is not None:
         transaction.amount = amount
     if check_number is not None:
@@ -217,36 +218,36 @@ def update(
         transaction.merchant_name = merchant_name
     if note is not None:
         transaction.note = note
-    session.commit()
+
     return transaction
 
 
-def delete(session, transaction_id: int) -> None:
+def delete(transaction_id: int) -> None:
     """Permanently delete a transaction.
 
     Raises LookupError if not found.
     """
-    transaction = get_by_model_id(session, Transaction, transaction_id)
-    session.delete(transaction)
-    session.commit()
+    transaction = get_by_model_id(Transaction, transaction_id)
+    Session.delete(transaction)
 
 
-def set_assignment(session, transaction_id: int, budget_item_id: int) -> None:
+
+def set_assignment(transaction_id: int, budget_item_id: int) -> None:
     """Assign (or reassign) a transaction to a budget item.
 
     Raises LookupError if transaction or budget_item not found.
     """
-    transaction = get_by_model_id(session, Transaction, transaction_id)
-    get_by_model_id(session, BudgetItem, budget_item_id)
+    transaction = get_by_model_id(Transaction, transaction_id)
+    get_by_model_id(BudgetItem, budget_item_id)
     transaction.budget_item_id = budget_item_id
-    session.commit()
 
 
-def remove_assignment(session, transaction_id: int) -> None:
+
+def remove_assignment(transaction_id: int) -> None:
     """Remove a transaction's explicit budget item assignment.
 
     Raises LookupError if transaction not found.
     """
-    transaction = get_by_model_id(session, Transaction, transaction_id)
+    transaction = get_by_model_id(Transaction, transaction_id)
     transaction.budget_item_id = None
-    session.commit()
+

@@ -1,7 +1,7 @@
 """Plaid Link service: link token creation and public token exchange."""
 
 from config import plaid_client
-from db import Account, Institution
+from db import Account, Institution, Session
 from plaid.model.accounts_get_request import AccountsGetRequest
 from plaid.model.country_code import CountryCode
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
@@ -30,7 +30,7 @@ def create_link_token() -> str:
     return response.link_token
 
 
-def exchange_public_token(public_token: str, session) -> dict:
+def exchange_public_token(public_token: str) -> dict:
     """Exchange a public_token for an access_token and persist Institution + Accounts.
 
     Creates or updates the Institution row, then upserts all linked accounts.
@@ -56,7 +56,7 @@ def exchange_public_token(public_token: str, session) -> dict:
         institution_name = inst_response.institution.name
 
     institution = (
-        session.query(Institution).filter_by(plaid_item_id=plaid_item_id).first()
+        Session.query(Institution).filter_by(plaid_item_id=plaid_item_id).first()
     )
     if institution:
         institution.access_token = access_token
@@ -68,16 +68,16 @@ def exchange_public_token(public_token: str, session) -> dict:
             plaid_item_id=plaid_item_id,
             sync_cursor="",
         )
-        session.add(institution)
+        Session.add(institution)
         # Flush so institution.id is populated before inserting accounts
-        session.flush()
+        Session.flush()
 
     accounts_response = plaid_client.accounts_get(
         AccountsGetRequest(access_token=access_token)
     )
     for acct in accounts_response.accounts:
         existing = (
-            session.query(Account).filter_by(plaid_account_id=acct.account_id).first()
+            Session.query(Account).filter_by(plaid_account_id=acct.account_id).first()
         )
         balance = acct.balances.current if acct.balances else None
         subtype = acct.subtype.value if acct.subtype else None
@@ -89,7 +89,7 @@ def exchange_public_token(public_token: str, session) -> dict:
             existing.subtype = subtype
             existing.type = type_
         else:
-            session.add(
+            Session.add(
                 Account(
                     current_balance=balance,
                     institution_id=institution.id,

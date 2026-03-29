@@ -1,6 +1,5 @@
 """Budget routes: monthly budget summary and budget item CRUD."""
 
-from db import with_session
 from flask import Blueprint, jsonify, request
 from services import budgets as budget_service
 
@@ -8,26 +7,23 @@ bp = Blueprint("budgets", __name__)
 
 
 @bp.get("/api/budgets/<month>")
-@with_session
-def get_budget(session, month):
+def get_budget(month):
     """Return computed planned/spent/remaining totals for the month."""
-    budget = budget_service.get_budget(session, month)
+    budget = budget_service.get_budget(month)
     if budget is None:
         raise LookupError(f"Budget {month} not found")
-    return jsonify(budget_service.compute_budget(session, budget))
+    return jsonify(budget_service.compute_budget(budget))
 
 
 @bp.post("/api/budgets/<month>")
-@with_session
-def create_budget(session, month):
+def create_budget(month):
     """Create the budget for a month, copying from the previous month if it exists."""
-    budget = budget_service.create_budget(session, month)
-    return jsonify(budget_service.compute_budget(session, budget)), 201
+    budget = budget_service.create_budget(month)
+    return jsonify(budget_service.compute_budget(budget)), 201
 
 
 @bp.post("/api/budget-items")
-@with_session
-def create_item(session):
+def create_item():
     """Add a new line item to a budget category."""
     data = request.get_json(force=True) or {}
     category_id = data.get("category_id")
@@ -35,7 +31,6 @@ def create_item(session):
     if category_id is None or not name:
         return jsonify({"error": "category_id and name are required"}), 400
     item = budget_service.create_item(
-        session,
         category_id=category_id,
         name=name,
         planned_amount=data.get("planned_amount", 0.0),
@@ -44,8 +39,7 @@ def create_item(session):
 
 
 @bp.patch("/api/budget-items/<int:item_id>")
-@with_session
-def update_item(session, item_id):
+def update_item(item_id):
     """Update a budget item."""
     data = request.get_json(force=True) or {}
     name = data.get("name")
@@ -55,7 +49,6 @@ def update_item(session, item_id):
             {"error": "At least one of name or planned_amount must be provided"}
         ), 400
     item = budget_service.update_item(
-        session,
         item_id,
         name=name,
         planned_amount=planned_amount,
@@ -64,8 +57,7 @@ def update_item(session, item_id):
 
 
 @bp.delete("/api/budget-items/<int:item_id>")
-@with_session
-def delete_item(session, item_id):
+def delete_item(item_id):
     """Delete a budget line item."""
-    budget_service.delete_item(session, item_id)
+    budget_service.delete_item(item_id)
     return "", 204

@@ -1,6 +1,5 @@
 """SQLAlchemy setup: engine, session factory, ORM models, and init_db helper."""
 
-import functools
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, create_engine
@@ -9,13 +8,14 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     relationship,
+    scoped_session,
     sessionmaker,
 )
 
 DATABASE_URL = "sqlite:///coin_log.db"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-Session = sessionmaker(bind=engine)
+Session = scoped_session(sessionmaker(bind=engine))
 
 
 class Base(DeclarativeBase):
@@ -137,7 +137,6 @@ class Transaction(Base):
         }
 
 
-
 class Budget(Base):
     """Monthly budget envelope, uniquely identified by YYYY-MM."""
 
@@ -202,23 +201,6 @@ class BudgetItem(Base):
             "name": self.name,
             "planned_amount": self.planned_amount,
         }
-
-
-def with_session(f):
-    """Inject an open session as first arg; roll back on exception, always close."""
-
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        session = Session()
-        try:
-            return f(session, *args, **kwargs)
-        except Exception:
-            session.rollback()
-            raise
-        finally:
-            session.close()
-
-    return wrapper
 
 
 def init_db() -> None:

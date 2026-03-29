@@ -1,6 +1,5 @@
 """Plaid Link routes: create_link_token and set_access_token."""
 
-from db import with_session
 from flask import Blueprint, jsonify, request
 from services import plaid as plaid_service
 
@@ -14,13 +13,11 @@ def create_link_token():
 
 
 @bp.post("/api/set_access_token")
-@with_session
-def set_access_token(session):
+def set_access_token():
     """Exchange a public_token and persist Institution + Accounts."""
     body = request.get_json(silent=True) or {}
     public_token = body.get("public_token")
     if not public_token:
         return jsonify({"error": "public_token is required"}), 400
-    result = plaid_service.exchange_public_token(public_token, session)
-    session.commit()
+    result = plaid_service.exchange_public_token(public_token)
     return jsonify(result)

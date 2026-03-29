@@ -1,15 +1,15 @@
 """Budget service: monthly budget management, categories, items, and summary."""
 
-from db import Budget, BudgetCategory, BudgetItem, Transaction
+from db import Budget, BudgetCategory, BudgetItem, Session, Transaction
 from utils import get_by_model_id, validate_month
 
 from services.budget_defaults import DEFAULTS, CategoryName
 
 
-def get_budget(session, month: str) -> Budget | None:
+def get_budget(month: str) -> Budget | None:
     """Fetch the budget for `month`; return None if it doesn't exist."""
     validate_month(month)
-    return session.query(Budget).filter_by(month=month).first()
+    return Session.query(Budget).filter_by(month=month).first()
 
 
 def _previous_month_key(month: str) -> str:
@@ -19,7 +19,7 @@ def _previous_month_key(month: str) -> str:
     return f"{year}-{month_num - 1:02d}"
 
 
-def create_budget(session, month: str) -> Budget:
+def create_budget(month: str) -> Budget:
     """Create a budget for `month`, copying planned amounts from the previous month.
 
     Falls back to DEFAULTS if the previous month has no budget.
@@ -27,7 +27,7 @@ def create_budget(session, month: str) -> Budget:
     """
     validate_month(month)
     previous_month = _previous_month_key(month)
-    previous_budget = session.query(Budget).filter_by(month=previous_month).first()
+    previous_budget = Session.query(Budget).filter_by(month=previous_month).first()
     budget = Budget(month=month)
     categories_data = (
         [
@@ -53,12 +53,12 @@ def create_budget(session, month: str) -> Budget:
             for item_data in category_data["items"]
         )
         budget.categories.append(category)
-    session.add(budget)
-    session.commit()
+    Session.add(budget)
+
     return budget
 
 
-def compute_budget(session, budget: Budget) -> dict:
+def compute_budget(budget: Budget) -> dict:
     """Return planned/spent/remaining summary for one budget month.
 
     Only transactions explicitly assigned to a budget item via
@@ -76,7 +76,7 @@ def compute_budget(session, budget: Budget) -> dict:
     assigned_transactions: list[Transaction] = []
     if budget_item_ids:
         assigned_transactions = (
-            session.query(Transaction)
+            Session.query(Transaction)
             .filter(
                 Transaction.budget_item_id.in_(budget_item_ids),
                 Transaction.is_deleted.is_(False),
@@ -136,7 +136,6 @@ def compute_budget(session, budget: Budget) -> dict:
 
 
 def create_item(
-    session,
     category_id: int,
     name: str,
     planned_amount: float,
@@ -145,19 +144,18 @@ def create_item(
 
     Raises LookupError if category_id does not exist.
     """
-    get_by_model_id(session, BudgetCategory, category_id)
+    get_by_model_id(BudgetCategory, category_id)
     item = BudgetItem(
         budget_category_id=category_id,
         name=name,
         planned_amount=planned_amount,
     )
-    session.add(item)
-    session.commit()
+    Session.add(item)
+
     return item
 
 
 def update_item(
-    session,
     item_id: int,
     name: str | None = None,
     planned_amount: float | None = None,
@@ -166,20 +164,20 @@ def update_item(
 
     Raises LookupError if not found.
     """
-    item = get_by_model_id(session, BudgetItem, item_id)
+    item = get_by_model_id(BudgetItem, item_id)
     if name is not None:
         item.name = name
     if planned_amount is not None:
         item.planned_amount = planned_amount
-    session.commit()
+
     return item
 
 
-def delete_item(session, item_id: int) -> None:
+def delete_item(item_id: int) -> None:
     """Delete a budget line item.
 
     Raises LookupError if not found.
     """
-    item = get_by_model_id(session, BudgetItem, item_id)
-    session.delete(item)
-    session.commit()
+    item = get_by_model_id(BudgetItem, item_id)
+    Session.delete(item)
+
