@@ -123,7 +123,9 @@ function ItemRow({ item, onItemClick, viewMode }: ItemRowProps) {
   const progressPercent =
     item.planned_amount > 0
       ? Math.min((item.actual / item.planned_amount) * 100, 100)
-      : 0;
+      : item.actual > 0
+        ? 100
+        : 0;
 
   // useActionState action: returns an error string on validation/API failure, null on success.
   async function saveAction(_prevError: string | null, formData: FormData) {
